@@ -6,12 +6,14 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
+
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentMap;
 import java.util.stream.Collectors;
+
 import com.google.common.base.CaseFormat;
 import com.google.common.collect.Maps;
 
@@ -94,23 +96,26 @@ public class ModelHelper {
 
 		private final String name;
 		private final String column;
+		private final String type;
 		private final Field field;
 		private final boolean primaryKey;
 		private final boolean insert;
 		private final String comment;
 
 		public Property(String name, String column, Field field, boolean primaryKey, boolean insert) {
-			this(name, column, field, primaryKey, insert, null);
+			this(name, column, null, field, primaryKey, insert, null);
 		}
 
-		public Property(String name, String column, boolean primaryKey, boolean insert) {
-			this(name, column, null, primaryKey, insert, null);
+		public Property(String name, String column, String type, boolean primaryKey, boolean insert, String comment) {
+			this(name, column, type, null, primaryKey, insert, comment);
 		}
 
-		public Property(String name, String column, Field field, boolean primaryKey, boolean insert, String comment) {
+		public Property(String name, String column, String type, Field field, boolean primaryKey, boolean insert,
+						String comment) {
 			super();
 			this.name = name;
 			this.column = column;
+			this.type = type;
 			this.field = field;
 			this.primaryKey = primaryKey;
 			this.insert = insert;

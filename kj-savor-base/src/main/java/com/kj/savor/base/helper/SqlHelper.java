@@ -1,6 +1,5 @@
 package com.kj.savor.base.helper;
 
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -24,12 +23,16 @@ public class SqlHelper {
 		StringBuilder sql = new StringBuilder();
 		sql.append("insert into ")
 						.append(Strings.isNullOrEmpty(table) ? model.getTable() : table)
+						.append("\n")
 						.append(" (")
 						.append(Joiner.on(",")
 										.join(model.getInsertProperties().stream().map(ModelHelper.Property::getColumn)
 														.collect(Collectors.toList())))
-						.append(") ").append("values")
-						.append(Joiner.on(",").join(
+						.append(") ")
+						.append("\n")
+						.append("values")
+						.append("\n")
+						.append(Joiner.on(",\n").join(
 										IntStream.range(0, objs.size()).boxed()
 														.map(i -> {
 															StringBuilder values = new StringBuilder();
@@ -58,15 +61,17 @@ public class SqlHelper {
 		StringBuilder sql = new StringBuilder();
 		sql.append("insert into ")
 						.append(Strings.isNullOrEmpty(table) ? model.getTable() : table)
+						.append("\n")
 						.append(" (")
 						.append(Joiner.on(",")
 										.join(model.getInsertProperties().stream().map(Property::getColumn)
 														.collect(Collectors.toList())))
-						.append(") values(")
+						.append(")\nvalues\n(")
 						.append(Joiner.on(",")
 										.join(model.getInsertProperties().stream().map(e -> ":" + e.getName())
 														.collect(Collectors.toList())))
-						.append(")").append("  on duplicate key update ")
+						.append(")\n ")
+						.append("  on duplicate key update ")
 						.append(Joiner.on(",").join(exprs));
 		Map<String, Object> params = Maps.newHashMap();
 		return SqlModel.model(sql, params);
@@ -76,6 +81,7 @@ public class SqlHelper {
 		StringBuilder sql = new StringBuilder();
 		sql.append("delete from ")
 						.append(Strings.isNullOrEmpty(table) ? model.getTable() : table)
+						.append("\n")
 						.append(SqlHelper.where(model, params));
 		return SqlModel.model(sql, params);
 	}
@@ -86,11 +92,30 @@ public class SqlHelper {
 		params = Maps.newHashMap(params);
 		sql.append("update ")
 						.append(Strings.isNullOrEmpty(table) ? model.getTable() : table)
+						.append("\n")
 						.append(" set ")
-						.append(Joiner.on(",").join(newValues.entrySet().stream().map(e -> {
-							ModelHelper.Property p = model.getProperty(e.getKey());
-							return p.getColumn() + "=:$newValuePrefix$" + p.getName();
-						}).collect(Collectors.toList())))
+						.append(Joiner.on(",").join(
+										newValues.entrySet().stream()
+														.sorted((e1, e2) -> e1.getKey().compareTo(e2.getKey()))
+														.map(e -> {
+															String[] s = e.getKey().split("#");
+															ModelHelper.Property p = model.getProperty(s[0]);
+															if (s.length == 2) {
+																switch (s[1].trim().toUpperCase()) {
+																case "EXPR":
+																	return p.getColumn() + " = " + e.getValue();
+																default:
+																	return p.getColumn() + " = " + p.getColumn() + " "
+																					+ s[1]
+																					+ " :$newValuePrefix$"
+																					+ e.getKey();
+																}
+															} else {
+																return p.getColumn() + " = :$newValuePrefix$"
+																				+ e.getKey();
+															}
+														}).collect(Collectors.toList())))
+						.append("\n")
 						.append(SqlHelper.where(model, params));
 		params.putAll(newValues.entrySet().stream()
 						.collect(Collectors.toMap(e -> "$newValuePrefix$" + e.getKey(), e -> e.getValue())));
@@ -133,13 +158,23 @@ public class SqlHelper {
 		if (params == null || params.isEmpty()) {
 			return "";
 		}
-		return " where " + Joiner.on(" and ").join(params.entrySet().stream().map(cond -> {
-			ModelHelper.Property p = model.getProperty(cond.getKey());
-			if (cond.getValue() instanceof Collection) {
-				return p.getColumn() + "in(:" + p.getName() + ")";
-			}
-			return p.getColumn() + "=:" + p.getName();
-		}).collect(Collectors.toList()));
+		return " where " + Joiner.on(" \nand ").join(
+						params.entrySet().stream()
+										.sorted((e1, e2) -> e1.getKey().compareTo(e2.getKey()))
+										.map(e -> {
+											String[] s = e.getKey().split("#");
+											ModelHelper.Property p = model.getProperty(s[0]);
+											if (s.length == 2) {
+												switch (s[1].trim().toUpperCase()) {
+												case "IN":
+													return p.getColumn() + " in (:" + e.getKey() + ")";
+												default:
+													return p.getColumn() + s[1] + " :" + e.getKey();
+												}
+											} else {
+												return p.getColumn() + " = :" + e.getKey();
+											}
+										}).collect(Collectors.toList()));
 	}
 
 	@Data
