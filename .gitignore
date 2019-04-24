@@ -1,0 +1,16 @@
+.idea
+*.iml
+*/*.iml
+*/.factorypath
+.classpath
+.project
+.settings
+.checkstyle
+.DS_Store
+*/*.class
+target/
+*/target/
+bin/*
+*/bin/*
+.gradle/*
+*/logs/*
