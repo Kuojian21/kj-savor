@@ -7,7 +7,7 @@ import com.kj.savor.base.helper.MapHelper;
 import com.kj.savor.base.helper.ModelHelper;
 import com.kj.savor.base.helper.SqlHelper;
 
-public class SqlBuilderTest {
+public class KjBase {
 
 	public static void main(String[] args) throws Exception {
 

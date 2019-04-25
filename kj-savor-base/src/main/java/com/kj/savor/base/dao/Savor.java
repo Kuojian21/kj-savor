@@ -19,12 +19,12 @@ import com.kj.savor.base.helper.SqlHelper.SqlModel;
  * @author kuojian21
  *
  */
-public abstract class SavorDao<T> {
+public abstract class Savor<T> {
 
 	private Class<T> clazz;
 	private RowMapper<T> rowMapper;
 
-	protected SavorDao() {
+	protected Savor() {
 		Type superClass = this.getClass().getGenericSuperclass();
 		if (superClass instanceof ParameterizedType) {
 			Type type = ((ParameterizedType) superClass).getActualTypeArguments()[0];
