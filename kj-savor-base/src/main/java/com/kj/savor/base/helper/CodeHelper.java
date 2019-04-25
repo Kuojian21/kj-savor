@@ -47,7 +47,7 @@ public class CodeHelper {
 												rs.getString("Comment"));
 							}
 						});
-		return new Model(CaseFormat.LOWER_UNDERSCORE.to(CaseFormat.LOWER_CAMEL, table), table, properties);
+		return new Model(CaseFormat.LOWER_UNDERSCORE.to(CaseFormat.UPPER_CAMEL, table), table, properties);
 	}
 
 	public static void code(Model model) {
@@ -57,6 +57,13 @@ public class CodeHelper {
 		System.out.println("public class " + model.getName() + "{");
 		for (Property property : model.getProperties()) {
 			System.out.println("\t/*" + property.getComment() + "*/");
+			if (property.isPrimaryKey()) {
+				System.out.print("\t@PrimaryKey");
+				if (property.isInsert()) {
+					System.out.print("(insert=true)");
+				}
+				System.out.println();
+			}
 			System.out.println("\tprivate " + property.getType() + " " + property.getName() + ";");
 		}
 		System.out.println("}");

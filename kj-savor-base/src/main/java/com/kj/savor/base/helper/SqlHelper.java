@@ -104,10 +104,16 @@ public class SqlHelper {
 																switch (s[1].trim().toUpperCase()) {
 																case "EXPR":
 																	return p.getColumn() + " = " + e.getValue();
+																case "ADD":
+																	return p.getColumn() + " = " + p.getColumn()
+																					+ " + :$newValuePrefix$"
+																					+ e.getKey();
+																case "SUB":
+																	return p.getColumn() + " = " + p.getColumn()
+																					+ " - :$newValuePrefix$"
+																					+ e.getKey();
 																default:
-																	return p.getColumn() + " = " + p.getColumn() + " "
-																					+ s[1]
-																					+ " :$newValuePrefix$"
+																	return p.getColumn() + " = :$newValuePrefix$"
 																					+ e.getKey();
 																}
 															} else {
@@ -158,6 +164,7 @@ public class SqlHelper {
 		if (params == null || params.isEmpty()) {
 			return "";
 		}
+
 		return " where " + Joiner.on(" \nand ").join(
 						params.entrySet().stream()
 										.sorted((e1, e2) -> e1.getKey().compareTo(e2.getKey()))
@@ -168,8 +175,23 @@ public class SqlHelper {
 												switch (s[1].trim().toUpperCase()) {
 												case "IN":
 													return p.getColumn() + " in (:" + e.getKey() + ")";
+//												case "<=":
+												case "LE":
+													return p.getColumn() + " <= :" + e.getKey();
+//												case "<":
+												case "LT":
+													return p.getColumn() + " < :" + e.getKey();
+//												case ">=":
+												case "GE":
+													return p.getColumn() + " >= :" + e.getKey();
+//												case ">":
+												case "GT":
+													return p.getColumn() + " > :" + e.getKey();
+//												case "!=":
+												case "NE":
+													return p.getColumn() + " != :" + e.getKey();
 												default:
-													return p.getColumn() + s[1] + " :" + e.getKey();
+													return p.getColumn() + " = :" + e.getKey();
 												}
 											} else {
 												return p.getColumn() + " = :" + e.getKey();
@@ -177,6 +199,11 @@ public class SqlHelper {
 										}).collect(Collectors.toList()));
 	}
 
+	/**
+	 * 
+	 * @author kuojian21
+	 *
+	 */
 	@Data
 	public static class SqlModel {
 		private StringBuilder sql;

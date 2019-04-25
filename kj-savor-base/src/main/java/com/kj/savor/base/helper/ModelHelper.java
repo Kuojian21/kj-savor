@@ -26,10 +26,10 @@ import lombok.Data;
  */
 public class ModelHelper {
 
-	private static final ConcurrentMap<Class<?>, Model> models = Maps.newConcurrentMap();
+	private static final ConcurrentMap<Class<?>, Model> MODELS = Maps.newConcurrentMap();
 
 	public static Model model(Class<?> clazz) {
-		return models.computeIfAbsent(clazz, k -> {
+		return MODELS.computeIfAbsent(clazz, k -> {
 			List<Property> properties = Arrays.stream(k.getDeclaredFields())
 							.filter(f -> !Modifier.isStatic(f.getModifiers())
 											&& !Modifier.isFinal(f.getModifiers()))
@@ -72,12 +72,13 @@ public class ModelHelper {
 											properties.stream().filter(p -> p.isInsert()).collect(Collectors.toList()));
 		}
 
+		@SuppressWarnings("checkstyle:HiddenField")
 		public Property getProperty(String name) {
 			return this.propertyMap.get(name);
 		}
 
 		public List<Property> getProperties(List<String> names) {
-			return names.stream().map(name -> this.propertyMap.get(name)).collect(Collectors.toList());
+			return names.stream().map(this.propertyMap::get).collect(Collectors.toList());
 		}
 
 		public String getTable(String suffix) {

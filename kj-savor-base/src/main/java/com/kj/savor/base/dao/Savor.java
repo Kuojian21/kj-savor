@@ -21,8 +21,9 @@ import com.kj.savor.base.helper.SqlHelper.SqlModel;
  */
 public abstract class Savor<T> {
 
-	private Class<T> clazz;
-	private RowMapper<T> rowMapper;
+	private final Class<T> clazz;
+	private final RowMapper<T> rowMapper;
+	private final Model model;
 
 	protected Savor() {
 		Type superClass = this.getClass().getGenericSuperclass();
@@ -31,8 +32,18 @@ public abstract class Savor<T> {
 			if (type instanceof Class) {
 				clazz = (Class<T>) type;
 				rowMapper = new BeanPropertyRowMapper<T>(clazz);
+				model = ModelHelper.model(clazz);
+			} else {
+				clazz = null;
+				rowMapper = null;
+				model = null;
 			}
+		} else {
+			clazz = null;
+			rowMapper = null;
+			model = null;
 		}
+
 	}
 
 	public int insert(List<T> objs) {
@@ -100,6 +111,7 @@ public abstract class Savor<T> {
 		return this.select(table, names, params, orderExprs, offset, limit, this.getRowMapper());
 	}
 
+	@SuppressWarnings("checkstyle:HiddenField")
 	public <R> List<R> select(String table, List<String> names,
 					Map<String, Object> params, List<String> orderExprs, Integer offset, Integer limit,
 					RowMapper<R> rowMapper) {
@@ -114,7 +126,7 @@ public abstract class Savor<T> {
 	}
 
 	public Model getModel() {
-		return ModelHelper.model(getClazz());
+		return model;
 	}
 
 	public Class<T> getClazz() {

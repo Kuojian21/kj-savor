@@ -8,7 +8,7 @@ import com.google.common.collect.Maps;
  * @author kuojian21
  *
  */
-public class MapHelper {
+public class ParamsHelper {
 
 	public static Map<String, Object> newHashMap(Object... objs) {
 		Map<String, Object> result = Maps.newHashMap();
