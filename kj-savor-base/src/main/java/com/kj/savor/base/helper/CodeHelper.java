@@ -33,7 +33,8 @@ public class CodeHelper {
 								} else if (rs.getString("Type").startsWith("bigint")) {
 									type = "Long";
 								} else if (rs.getString("Type").startsWith("varchar")
-												|| rs.getString("Type").endsWith("text")) {
+												|| rs.getString("Type").endsWith("text")
+												|| rs.getString("Type").equals("json")) {
 									type = "String";
 								}
 
